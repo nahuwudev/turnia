@@ -1,3 +1,5 @@
+// A example list of usefull tables/functions/views for the project.
+
 export type Json =
   | string
   | number
@@ -13,31 +15,53 @@ export type Database = {
         Row: {
           appointment_date: string
           attended: boolean | null
+          client_id: string | null
           created_at: string | null
           id: string
+          notes: string | null
+          recordatory: boolean | null
           status: string
+          tag: string | null
+          type_of_date: string | null
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
           appointment_date: string
           attended?: boolean | null
+          client_id?: string | null
           created_at?: string | null
           id?: string
-          status: string
+          notes?: string | null
+          recordatory?: boolean | null
+          status?: string
+          tag?: string | null
+          type_of_date?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
           appointment_date?: string
           attended?: boolean | null
+          client_id?: string | null
           created_at?: string | null
           id?: string
+          notes?: string | null
+          recordatory?: boolean | null
           status?: string
+          tag?: string | null
+          type_of_date?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "user_details_view"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "appointments_user_id_fkey"
             columns: ["user_id"]
@@ -116,6 +140,32 @@ export type Database = {
       }
     }
     Views: {
+      appointments_details_view: {
+        Row: {
+          appointment_date: string | null
+          appointment_id: string | null
+          attended: boolean | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          notes: string | null
+          recordatory: boolean | null
+          status: string | null
+          tag: string | null
+          type_of_date: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_details_view"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       user_details_view: {
         Row: {
           avatar_profile: string | null

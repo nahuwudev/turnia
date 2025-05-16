@@ -4,12 +4,12 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   getMonthlyIncome,
-  getPendingAppointments,
-  getTodayAppointments,
 } from "@/lib/api.dashboard";
 import { directories } from "@/lib/directorios";
+import { useStoreAppointments } from "@/store/appointments-store";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale/es";
@@ -35,31 +35,36 @@ import {
 import { Link } from "react-router";
 
 export const CardSectionDashboard = () => {
-  // Citas de hoy
-  const { data: todayAppointments, isLoading: loadingToday } = useQuery({
-    queryKey: ["todayAppointments"],
-    queryFn: getTodayAppointments,
-  });
+  const { getTodayAppointments, getPendingAppointments, loading, error } = useStoreAppointments();
+  const todayAppointments = getTodayAppointments();
+  const pendingAppointments = getPendingAppointments();
 
-  // Citas por confirmar
-  const { data: pendingAppointments, isLoading: loadingPending } = useQuery({
-    queryKey: ["pendingAppointments"],
-    queryFn: getPendingAppointments,
-  });
-
-  // Ingresos del mes
   const { data: monthlyIncome, isLoading: loadingIncome } = useQuery({
-    queryKey: ["monthlyIncome"],
+    queryKey: ['monthlyIncome'],
     queryFn: getMonthlyIncome,
   });
 
-  if (loadingToday || loadingPending || loadingIncome) {
-    return <div>Cargando...</div>;
+  if (loading || loadingIncome) {
+    return (
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i} className="h-36 p-4">
+            <Skeleton className="h-4 w-1/3 mb-2" />
+            <Skeleton className="h-10 w-1/4 mb-4" />
+            <Skeleton className="h-4 w-1/2" />
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
   }
 
   const isNegativePercentage = monthlyIncome?.percentageChange
-    .toFixed(1)
-    .includes("-");
+    ?.toFixed(1)
+    .includes('-');
 
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -68,16 +73,16 @@ export const CardSectionDashboard = () => {
           <h3 className="text-sm text-slate-600">Citas de hoy</h3>
         </CardHeader>
         <CardContent className="flex items-center justify-between">
-          <h3 className="text-5xl mb-2">{todayAppointments?.count || 0}</h3>
+          <h3 className="text-5xl mb-2">{todayAppointments.count}</h3>
           <UserCog className="mb-2" color="#744bd2" size={50} />
         </CardContent>
         <CardFooter className="text-sm text-slate-600">
           <p>
-            {todayAppointments?.next
-              ? `Próxima ${format(new Date(todayAppointments.next), "HH:mm", {
+            {todayAppointments.next
+              ? `Próxima ${format(new Date(todayAppointments.next), 'HH:mm', {
                   locale: es,
                 })}`
-              : "Sin más citas"}
+              : 'Sin más citas'}
           </p>
         </CardFooter>
       </Card>
@@ -87,7 +92,7 @@ export const CardSectionDashboard = () => {
           <h3 className="text-sm text-slate-600">Por confirmar</h3>
         </CardHeader>
         <CardContent className="flex items-center justify-between">
-          <h3 className="text-5xl mb-2">{pendingAppointments || 0}</h3>
+          <h3 className="text-5xl mb-2">{pendingAppointments}</h3>
           <Hourglass className="mb-2" color="#74d24b" size={50} />
         </CardContent>
         <CardFooter className="text-sm text-slate-600 flex items-center">
@@ -117,7 +122,6 @@ export const CardSectionDashboard = () => {
           ) : (
             <ArrowUp className="w-4 mr-1" />
           )}
-
           <p>{monthlyIncome?.percentageChange.toFixed(1)}% vs. mes anterior</p>
         </CardFooter>
       </Card>

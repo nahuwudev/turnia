@@ -7,7 +7,7 @@ export const LastActivity = () => {
   return (
     <Card className="lg:h-[30rem]">
       <CardHeader className="flex justify-between">
-        <h1 className="font-bold">Próximas citas</h1>
+        <h1 className="font-bold">Últimas actividades</h1>
         <div className="flex items-center text-sm text-blue-600">
           <Link to={directories.notification.url}>Ver todas</Link>
           <ArrowRight className="w-4 mr-3 ml-1" />

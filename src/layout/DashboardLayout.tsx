@@ -14,25 +14,16 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { directories } from "@/lib/directorios";
-import { useAuthStore } from "@/store/auth-store";
 import { Separator } from "@radix-ui/react-separator";
 
 import { useEffect, useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router";
+import { Outlet, useLocation } from "react-router";
 
 export default function DashboardLayout() {
   const location = useLocation().pathname;
-  const { user, loading } = useAuthStore();
   const isRootDashboard = location === "/dashboard";
   const locationLabel = location.replace("/dashboard/", "");
-  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate(directories.login.url, { replace: true });
-    }
-  }, [navigate, user, loading]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,15 +40,6 @@ export default function DashboardLayout() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  if (!user) {
-    return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    return null; 
-  }
-
 
   return (
     <SidebarProvider>

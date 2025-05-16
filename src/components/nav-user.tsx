@@ -16,16 +16,18 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router";
-import { useAuthStore } from "@/store/auth-store";
+import supabase from "@/lib/supabase";
+import { useStoreProfile } from "@/store/profle-store";
 
 export function NavUser() {
   const navigate = useNavigate();
   const { isMobile } = useSidebar();
-  const { logout, profile } = useAuthStore();
+  const { profile, clearProfile } = useStoreProfile();
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await supabase.auth.signOut();
+      clearProfile();
       navigate("/login", { replace: true });
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
@@ -33,7 +35,6 @@ export function NavUser() {
     }
   };
 
-  // Manejar profile de forma segura
   const avatarUrl = profile?.avatar_profile ?? undefined;
   const fullName = profile?.full_name ?? undefined;
   const email = profile?.email ?? undefined;
@@ -58,7 +59,9 @@ export function NavUser() {
                   src={avatarUrl}
                   alt={fullName}
                 />
-                <AvatarFallback className="rounded-lg">{nameFallback}</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {nameFallback}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{fullName}</span>
@@ -76,11 +79,10 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-full">
-                  <AvatarImage
-                    src={avatarUrl}
-                    alt={fullName}
-                  />
-                  <AvatarFallback className="rounded-full">{nameFallback}</AvatarFallback>
+                  <AvatarImage src={avatarUrl} alt={fullName} />
+                  <AvatarFallback className="rounded-full">
+                    {nameFallback}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{fullName}</span>

@@ -1,42 +1,38 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router";
-import supabase from "@/lib/supabase";
-import { useAuthStore } from "@/store/auth-store";
-import { directories } from "@/lib/directorios";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
+import supabase from '@/lib/supabase';
+
+import { directories } from '@/lib/directorios';
+import { useProfile } from '@/hooks/use-profile';
 
 function AuthCallback() {
   const navigate = useNavigate();
-  const { loading, isAuthenticated, setAuth } = useAuthStore();
+  const [userId, setUserId] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+  const { data: profile, isLoading: profileLoading } = useProfile(userId);
 
   useEffect(() => {
-    async function handleAuthCallback() {
-      if (loading) return;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id);
+      setLoading(false);
+    });
+  }, []);
 
-      const { data, error } = await supabase.auth.getSession();
-      if (error || !data.session) {
-        console.error("Error en callback:", error?.message);
-        navigate(directories.login.url, { state: { error: error?.message } });
-        return;
-      }
+  useEffect(() => {
+    if (loading || profileLoading) return;
 
-      const { data: profileData, error: profileError } = await supabase
-        .rpc("get_user_details", { p_user_id: data.session.user.id })
-        .single();
-
-      if (profileError) {
-        console.error("Error cargando perfil:", profileError.message);
-        navigate(directories.register.url, {
-          state: { error: "Error al cargar perfil" },
-        });
-        return;
-      }
-
-      setAuth(data.session, profileData);
-
-      navigate(directories.dashboard.url, { replace: true });
+    if (!userId) {
+      navigate(directories.login.url, { state: { error: 'No se pudo autenticar' } });
+      return;
     }
-    handleAuthCallback();
-  }, [navigate, isAuthenticated, loading, setAuth]);
+
+    if (!profile) {
+      navigate(directories.register.url, { state: { error: 'Error al cargar perfil' } });
+      return;
+    }
+
+    navigate(directories.dashboard.url, { replace: true });
+  }, [navigate, userId, profile, loading, profileLoading]);
 
   return <div>Loading.. AuthCallback.</div>;
 }

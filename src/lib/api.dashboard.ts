@@ -1,15 +1,14 @@
 import supabase from "@/lib/supabase";
 import { endOfDay, endOfMonth, startOfMonth } from "date-fns";
 
-// Helper para obtener el inicio y fin del mes actual
 const getMonthRange = () => {
-  const now = new Date(); // 2025-05-15T06:30:00-03:00
-  const currentStart = startOfMonth(now); // 2025-05-01T00:00:00-03:00
-  const currentEnd = endOfDay(endOfMonth(now)); // 2025-05-31T23:59:59.999-03:00
+  const now = new Date(); 
+  const currentStart = startOfMonth(now); 
+  const currentEnd = endOfDay(endOfMonth(now));
   return { currentStart, currentEnd };
 };
 
-// Helper para obtener el inicio del día actual
+
 const getTodayRange = () => {
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -28,7 +27,7 @@ export const getTodayAppointments = async () => {
     throw new Error("No hay usuario autenticado");
   }
   const { startOfDay, endOfDay } = getTodayRange();
-  const now = new Date(); // Hora actual: 2025-05-15T08:51:00-03:00
+  const now = new Date();
 
   const { data, error } = await supabase
     .from("appointments")

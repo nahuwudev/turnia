@@ -17,16 +17,42 @@ import Login from "./routes/Login";
 import { ProtectedRoute } from "./components/protected-route";
 import AuthCallback from "./routes/AuthCallback";
 import { Register } from "./routes/register";
-import { useAuthStore } from "./store/auth-store";
+import { useStoreProfile } from "./store/profle-store";
 import { useEffect } from "react";
+import supabase from "./lib/supabase";
+import { useStoreAppointments } from "./store/appointments-store";
 
 function App() {
-  const initialize = useAuthStore((state) => state.initialize);
+  const { initialize: initializeProfile, clearProfile } = useStoreProfile();
+  const { initialize: initializeAppointments, clearAppointments } =
+    useStoreAppointments();
 
   useEffect(() => {
-    initialize();
-  }, [initialize])
-  
+    initializeProfile();
+    initializeAppointments();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "SIGNED_IN" && session?.user) {
+          initializeProfile();
+          initializeAppointments();
+        } else if (event === "SIGNED_OUT") {
+          clearProfile();
+          clearAppointments();
+        }
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [
+    initializeProfile,
+    clearProfile,
+    initializeAppointments,
+    clearAppointments,
+  ]);
+
   return (
     <Routes>
       <Route path={directories.home.url} element={<Home />} />

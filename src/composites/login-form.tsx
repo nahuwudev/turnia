@@ -52,7 +52,7 @@ export function LoginForm({
 
     if (error) {
       console.error("Error signing in:", error.message);
-      setFormErrors({ email: error.message }); // Mostrar error en el formulario
+      setFormErrors({ email: error.message }); 
       return;
     }
 
